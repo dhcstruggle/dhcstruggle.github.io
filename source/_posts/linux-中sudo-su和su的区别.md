@@ -2,6 +2,9 @@
 title: linux 中sudo su和su的区别
 date: 2020-06-30 20:48:44
 tags:
+- linux
+- 命令
+- 用户管理
 ---
 
 # 前言
