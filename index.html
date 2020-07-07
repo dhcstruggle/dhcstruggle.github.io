@@ -198,10 +198,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近在使用dd命令做镜像的时候，只能干等着，不知道dd的进度到哪里了，对于我们这种想即时看到反馈的程序员来说，如果没有进度那简直是煎熬。在网上查了一些资料，发现还真有查看进度的方法，现记录于此。</p>
-<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>基本原理就是，使用kill，pkill，killall命令发送信号给对应想查看信息的进程，再配合watch命令，每隔一段时间发送信号即可，具体命令如下：</p>
-<pre><code>watch -n 5 pkill -USR1 dd</code></pre><h1 id="需要注意的地方"><a href="#需要注意的地方" class="headerlink" title="需要注意的地方"></a>需要注意的地方</h1><p>如果有多个dd进程，则这个命令会把USR1信号发给每一个dd进程。</p>
-<h1 id="举一反三"><a href="#举一反三" class="headerlink" title="举一反三"></a>举一反三</h1><p>类似的，我们在用cp命令拷贝大文件时，也可以使用这种方法进行进度的查看。</p>
-
+        
       
 
       
@@ -304,9 +301,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在ubuntu系统安装完成之后，我们会创建一个初始账户，而这个账户属于sudo用户组，可以通过sudo命令暂时获取到系统的root权限。有些情况下，我们想让终端获取到root权限后进行一些操作，最直接的方法是通过运行su命令，直接切换成root用户即可。但是，ubuntu创建时，默认没有创建root用户，而创建root用户实际上对系统的安全性是有一定危害的。那有没有一种方法，可以不用创建root用户，也能让终端获取到root权限呢？答案就是通过sudo su命令。下面说明一下su命令和sudo su 命令的区别。</p>
-<h2 id="su"><a href="#su" class="headerlink" title="su"></a>su</h2><p>su命令，功能是进行用户的切换。<br>如果su命令后面没有跟用户名，则默认切换为root用户，理所当然也就需要root用户的密码。</p>
-<h2 id="sudo-su"><a href="#sudo-su" class="headerlink" title="sudo su"></a>sudo su</h2><p>sudo su，功能是当前用户暂时申请root的权限，并且赋给当前终端的一种操作，这边需要的是当前用户的密码，而不需要root的密码。</p>
-
+        
       
 
       
