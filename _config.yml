@@ -120,3 +120,5 @@ jsonContent:
     excerpt: false
     categories: false
     tags: true
+
+word_count: true
