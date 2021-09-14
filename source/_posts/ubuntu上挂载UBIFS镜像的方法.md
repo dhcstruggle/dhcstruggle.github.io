@@ -15,15 +15,15 @@ tags:
 
 ## ubuntu虚拟机
 
-	\# uname -a
+	# uname -a
 	Linux ubuntu 5.8.0-63-generic #71~20.04.1-Ubuntu SMP Thu Jul 15 17:46:08 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
 
 
 ## ubifs镜像文件
 
-	\# file ubifs.bin
+	# file ubifs.bin
 	ubifs.bin: UBI image, version 1
-	\# ls -l ubifs.bin
+	# ls -l ubifs.bin
 	-rw-r--r-- 1 root root 536870912 Aug  1 19:32 ubifs.bin
 
 
@@ -36,8 +36,8 @@ tags:
 ## 0x02
 使用命令在dev目录下模拟出对应的mtd节点(需要足够大)，命令如下：
 
-	\# modprobe nandsim first_id_byte=0x98 second_id_byte=0xdc third_id_byte=0x90 fourth_id_byte=0x26
-	\# mtdinfo /dev/mtd0
+	# modprobe nandsim first_id_byte=0x98 second_id_byte=0xdc third_id_byte=0x90 fourth_id_byte=0x26
+	# mtdinfo /dev/mtd0
 	mtd0
 	Name:                           NAND simulator partition 0
 	Type:                           nand
@@ -50,7 +50,7 @@ tags:
 	Bad blocks are allowed:         true
 	Device is writable:             true
 
-	\# # cat /proc/mtd
+	# cat /proc/mtd
 	dev:    size   erasesize  name
 	mtd0: 20000000 00040000 "NAND simulator partition 0"
 
@@ -65,7 +65,7 @@ tags:
 ## 0x03
 把镜像文件导入到节点中：
 
-	\# dd if=ubifs.bin of=/dev/mtd0 bs=4096
+	# dd if=ubifs.bin of=/dev/mtd0 bs=4096
 	131072+0 records in
 	131072+0 records out
 	536870912 bytes (537 MB, 512 MiB) copied, 0.97402 s, 551 MB/s
@@ -73,25 +73,25 @@ tags:
 
 或者：
 
-	\# nandwrite /dev/mtd0 ubifs.bin
+	# nandwrite /dev/mtd0 ubifs.bin
 
 
 ## 0x04
 把ubi文件系统和mtd0作关联
 
-	\# modprobe ubi mtd=/dev/mtd0,4096
+	# modprobe ubi mtd=/dev/mtd0,4096
 
 
 ## 0x05
 挂载到对应的目录下即可
 
-	\# mount -t ubifs  -o ro /dev/ubi0_0 ubi
+	# mount -t ubifs  -o ro /dev/ubi0_0 ubi
 
 
 ## 0x06
 最后，如果要测试其它的ubifs镜像，需要移除以上步骤中加载的内核模块，移除的方法如下【前后顺序不可变】
 
-	\# rmmod ubifs ubi nandsim
+	# rmmod ubifs ubi nandsim
 
 
 
