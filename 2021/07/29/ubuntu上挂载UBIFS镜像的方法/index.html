@@ -16,7 +16,7 @@
 <meta property="og:description" content="前言最近手上有一个从芯片上直接通过RT809读取出来的镜像文件，需要拷贝出里面对应的文件，网络上查到的资料大多都不是很全，导致走了一些弯路，现把挂载方法记录于此。">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-07-29T02:48:44.000Z">
-<meta property="article:modified_time" content="2021-08-05T15:21:14.010Z">
+<meta property="article:modified_time" content="2021-09-19T02:01:08.941Z">
 <meta property="article:author" content="chaos">
 <meta property="article:tag" content="ubuntu">
 <meta property="article:tag" content="ubifs">
@@ -209,14 +209,14 @@
         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近手上有一个从芯片上直接通过RT809读取出来的镜像文件，需要拷贝出里面对应的文件，网络上查到的资料大多都不是很全，导致走了一些弯路，现把挂载方法记录于此。</p>
 <a id="more"></a>
 
-<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><h2 id="ubuntu虚拟机"><a href="#ubuntu虚拟机" class="headerlink" title="ubuntu虚拟机"></a>ubuntu虚拟机</h2><pre><code>\# uname -a
-Linux ubuntu 5.8.0-63-generic #71~20.04.1-Ubuntu SMP Thu Jul 15 17:46:08 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux</code></pre><h2 id="ubifs镜像文件"><a href="#ubifs镜像文件" class="headerlink" title="ubifs镜像文件"></a>ubifs镜像文件</h2><pre><code>\# file ubifs.bin
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><h2 id="ubuntu虚拟机"><a href="#ubuntu虚拟机" class="headerlink" title="ubuntu虚拟机"></a>ubuntu虚拟机</h2><pre><code># uname -a
+Linux ubuntu 5.8.0-63-generic #71~20.04.1-Ubuntu SMP Thu Jul 15 17:46:08 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux</code></pre><h2 id="ubifs镜像文件"><a href="#ubifs镜像文件" class="headerlink" title="ubifs镜像文件"></a>ubifs镜像文件</h2><pre><code># file ubifs.bin
 ubifs.bin: UBI image, version 1
-\# ls -l ubifs.bin
+# ls -l ubifs.bin
 -rw-r--r-- 1 root root 536870912 Aug  1 19:32 ubifs.bin</code></pre><h1 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h1><h2 id="0x01"><a href="#0x01" class="headerlink" title="0x01"></a>0x01</h2><p>确认镜像的页大小和块大小：查找对应芯片的芯片手册，手册中有说明页大小和块大小。我手上的镜像页大小为4K，块大小256K</p>
 <h2 id="0x02"><a href="#0x02" class="headerlink" title="0x02"></a>0x02</h2><p>使用命令在dev目录下模拟出对应的mtd节点(需要足够大)，命令如下：</p>
-<pre><code>\# modprobe nandsim first_id_byte=0x98 second_id_byte=0xdc third_id_byte=0x90 fourth_id_byte=0x26
-\# mtdinfo /dev/mtd0
+<pre><code># modprobe nandsim first_id_byte=0x98 second_id_byte=0xdc third_id_byte=0x90 fourth_id_byte=0x26
+# mtdinfo /dev/mtd0
 mtd0
 Name:                           NAND simulator partition 0
 Type:                           nand
@@ -229,18 +229,18 @@ Character device major/minor:   90:0
 Bad blocks are allowed:         true
 Device is writable:             true
 
-\# # cat /proc/mtd
+# cat /proc/mtd
 dev:    size   erasesize  name
 mtd0: 20000000 00040000 &quot;NAND simulator partition 0&quot;</code></pre><p>这里的四个id的参数，其中前两个代表对应产商ID和芯片ID，在以下的网站有列出各个参数代表的flash品牌和大小（取Full ID前四个参数即可）：<br><a href="http://www.linux-mtd.infradead.org/nand-data/nanddata.html" target="_blank" rel="noopener">http://www.linux-mtd.infradead.org/nand-data/nanddata.html</a><br>另外，在网络上也有查到一些，这里可以参考<br><a href="http://trac.gateworks.com/wiki/linux/ubi#ubiondevhost" target="_blank" rel="noopener">http://trac.gateworks.com/wiki/linux/ubi#ubiondevhost</a><br><a href="http://linux-mtd.infradead.org/faq/nand.html" target="_blank" rel="noopener">http://linux-mtd.infradead.org/faq/nand.html</a><br>若模拟的mtd节点不符合要求，可输入“rmmod nandsim” 命令删除节点，重新模拟</p>
 <h2 id="0x03"><a href="#0x03" class="headerlink" title="0x03"></a>0x03</h2><p>把镜像文件导入到节点中：</p>
-<pre><code>\# dd if=ubifs.bin of=/dev/mtd0 bs=4096
+<pre><code># dd if=ubifs.bin of=/dev/mtd0 bs=4096
 131072+0 records in
 131072+0 records out
 536870912 bytes (537 MB, 512 MiB) copied, 0.97402 s, 551 MB/s</code></pre><p>或者：</p>
-<pre><code>\# nandwrite /dev/mtd0 ubifs.bin</code></pre><h2 id="0x04"><a href="#0x04" class="headerlink" title="0x04"></a>0x04</h2><p>把ubi文件系统和mtd0作关联</p>
-<pre><code>\# modprobe ubi mtd=/dev/mtd0,4096</code></pre><h2 id="0x05"><a href="#0x05" class="headerlink" title="0x05"></a>0x05</h2><p>挂载到对应的目录下即可</p>
-<pre><code>\# mount -t ubifs  -o ro /dev/ubi0_0 ubi</code></pre><h2 id="0x06"><a href="#0x06" class="headerlink" title="0x06"></a>0x06</h2><p>最后，如果要测试其它的ubifs镜像，需要移除以上步骤中加载的内核模块，移除的方法如下【前后顺序不可变】</p>
-<pre><code>\# rmmod ubifs ubi nandsim</code></pre>
+<pre><code># nandwrite /dev/mtd0 ubifs.bin</code></pre><h2 id="0x04"><a href="#0x04" class="headerlink" title="0x04"></a>0x04</h2><p>把ubi文件系统和mtd0作关联</p>
+<pre><code># modprobe ubi mtd=/dev/mtd0,4096</code></pre><h2 id="0x05"><a href="#0x05" class="headerlink" title="0x05"></a>0x05</h2><p>挂载到对应的目录下即可</p>
+<pre><code># mount -t ubifs  -o ro /dev/ubi0_0 ubi</code></pre><h2 id="0x06"><a href="#0x06" class="headerlink" title="0x06"></a>0x06</h2><p>最后，如果要测试其它的ubifs镜像，需要移除以上步骤中加载的内核模块，移除的方法如下【前后顺序不可变】</p>
+<pre><code># rmmod ubifs ubi nandsim</code></pre>
       
 
       
@@ -358,9 +358,18 @@ mtd0: 20000000 00040000 &quot;NAND simulator partition 0&quot;</code></pre><p>�
   
 <nav id="article-nav">
   
+    <a href="/2021/08/26/linux%20%E5%88%B6%E4%BD%9C%E8%BF%9C%E7%A8%8B%E9%95%9C%E5%83%8F%E7%9A%84%E6%96%B9%E6%B3%95/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          linux 制作远程镜像的方法
+        
+      </div>
+    </a>
   
-    <a href="/2020/07/07/py%E6%96%87%E4%BB%B6%E6%89%93%E5%8C%85%E6%88%90exe%E7%9A%84%E6%96%B9%E6%B3%95/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">py文件打包成exe的方法</div>
+  
+    <a href="/2020/07/06/dd%E5%91%BD%E4%BB%A4%E8%BF%9B%E5%BA%A6%E4%BF%A1%E6%81%AF%E6%9F%A5%E7%9C%8B%E6%96%B9%E6%B3%95/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">dd命令进度信息查看方法</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -499,22 +508,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">python</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">linux</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">命令</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">用户管理</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">ubuntu</a>
               </li>
              
@@ -523,7 +516,27 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">linux</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">dd</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">nc</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ssh</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">命令</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">用户管理</a>
               </li>
             
             <div class="clearfix"></div>
