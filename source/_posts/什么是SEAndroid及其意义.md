@@ -1,0 +1,23 @@
+---
+title: 什么是SEAndroid及其意义
+date: 2021-10-12 10:50:41
+tags:
+- android
+- 安全
+---
+
+# 前言
+最近在研究某一些android设备的升级方案时，发现对应的升级包中有META-INF文件夹，这个和apk中的签名类似，因此需要研究一下apk的重打包机制。
+
+<!--more-->
+
+# 为何要签名
+dummy
+
+# 签名的方法
+dummy
+
+# META-INF文件夹内容
+dummy
+
+
